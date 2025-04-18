@@ -1,5 +1,6 @@
 package ra.edu.validate;
 
+import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,5 +28,62 @@ public class Validator {
         Pattern pattern = Pattern.compile(dateRegex);
         Matcher matcher = pattern.matcher(date);
         return matcher.matches();
+    }
+
+    // Kiểm tra tên sản phẩm
+    public static boolean isValidProductName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            System.out.println("Tên sản phẩm không được để trống.");
+            return false;
+        }
+        if (name.length() < 3 || name.length() > 100) {
+            System.out.println("Tên sản phẩm phải có độ dài từ 3 đến 100 ký tự.");
+            return false;
+        }
+        if (!Pattern.matches("^[a-zA-Z0-9\\s]+$", name)) {
+            System.out.println("Tên sản phẩm không được chứa ký tự đặc biệt.");
+            return false;
+        }
+        return true;
+    }
+
+    // Kiểm tra nhãn hàng
+    public static boolean isValidBrand(String brand) {
+        if (brand == null || brand.trim().isEmpty()) {
+            System.out.println("Nhãn hàng không được để trống.");
+            return false;
+        }
+        if (brand.length() < 3 || brand.length() > 50) {
+            System.out.println("Nhãn hàng phải có độ dài từ 3 đến 50 ký tự.");
+            return false;
+        }
+        return true;
+    }
+
+    // Kiểm tra giá
+    public static boolean isValidPrice(BigDecimal price) {
+        if (price == null) {
+            System.out.println("Giá không được để trống.");
+            return false;
+        }
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+            System.out.println("Giá phải là số dương.");
+            return false;
+        }
+        return true;
+    }
+
+    // Kiểm tra số lượng tồn kho
+    public static boolean isValidStock(int stock) {
+        if (stock < 0) {
+            System.out.println("Số lượng tồn kho phải là số nguyên dương.");
+            return false;
+        }
+        return true;
+    }
+
+    // Kiểm tra tổng thể
+    public static boolean isValidProduct(String name, String brand, BigDecimal price, int stock) {
+        return isValidProductName(name) && isValidBrand(brand) && isValidPrice(price) && isValidStock(stock);
     }
 }
