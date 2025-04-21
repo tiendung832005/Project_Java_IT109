@@ -1,6 +1,6 @@
 package ra.edu.business.service;
 
-import ra.edu.business.dao.productDAO;
+import ra.edu.business.dao.ProductDAO;
 import ra.edu.entity.Product;
 import ra.edu.validate.Validator;
 
@@ -8,28 +8,14 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Scanner;
 
-public class productService {
-    private productDAO productDAO = new productDAO();
+public class ProductService {
+    private ProductDAO productDAO = new ProductDAO();
     private Scanner scanner = new Scanner(System.in);
 
     // ds tất cả sản phẩm
     public void displayAllProducts() {
         List<Product> products = productDAO.getallProducts();
-        if (products.isEmpty()) {
-            System.out.println("Không có sản phẩm nào trong danh sách.");
-        } else {
-            System.out.println("                ====== Danh Sách Sản Phẩm ======");
-            System.out.printf("%-10s %-20s %-15s %-10s %-10s%n", "ID", "Tên Sản Phẩm", "Nhãn Hàng", "Giá", "Tồn Kho");
-            System.out.println("-------------------------------------------------------------------");
-            for (Product product : products) {
-                System.out.printf("%-10d %-20s %-15s %-10.2f %-10d%n",
-                        product.getProductId(),
-                        product.getName(),
-                        product.getBrand(),
-                        product.getPrice(),
-                        product.getStock());
-            }
-        }
+        displayProducts(products);
     }
 
     //Thêm điện thoại
@@ -72,10 +58,16 @@ public class productService {
             return;
         }
 
-        System.out.println("Thông tin sản phẩm hiện tại: " + product);
+        System.out.println("Thông tin sản phẩm hiện tại: ");
+        displayProducts(List.of(product));
 
         System.out.print("Nhập tên sản phẩm mới: ");
         String name = scanner.nextLine();
+
+        if (productDAO.isProductNameExists(name)) {
+            System.out.println("Tên sản phẩm này đã tồn tại. Vui lòng chọn tên khác.");
+            return;
+        }
 
         System.out.print("Nhập nhãn hiệu mới: ");
         String brand = scanner.nextLine();
@@ -87,7 +79,7 @@ public class productService {
         int stock = scanner.nextInt();
         scanner.nextLine();
 
-        // validate
+        // Validate
         if (Validator.isValidProduct(name, brand, price, stock)) {
             product.setName(name);
             product.setBrand(brand);
@@ -164,12 +156,35 @@ public class productService {
         if (products.isEmpty()) {
             System.out.println("Không tìm thấy sản phẩm nào.");
         } else {
-            System.out.println("=== Danh Sách Sản Phẩm ===");
+            // Tiêu đề bảng
+            System.out.println("+----------------------------------------------------------------------------+");
+            System.out.println("|                        ====== Danh Sách Sản Phẩm ======                    |");
+            System.out.println("+------------+--------------------+----------------+------------+------------+");
+            System.out.printf("| %-10s | %-18s | %-14s | %-10s | %-10s |\n", "ID", "Tên Sản Phẩm", "Nhãn Hàng", "Giá", "Tồn Kho");
+            System.out.println("+------------+--------------------+----------------+------------+------------+");
+
+            // Hiển thị thông tin sản phẩm
             for (Product product : products) {
-                System.out.println(product);
+                BigDecimal price = product.getPrice();
+                // Kiểm tra xem giá có phần thập phân không
+                if (price.stripTrailingZeros().scale() <= 0) {
+                    System.out.printf("| %-10d | %-18s | %-14s | %-10d | %-10d |\n",
+                            product.getProductId(),
+                            product.getName(),
+                            product.getBrand(),
+                            price.intValue(),
+                            product.getStock());
+                } else {
+                    System.out.printf("| %-10d | %-18s | %-14s | %-10.2f | %-10d |\n",
+                            product.getProductId(),
+                            product.getName(),
+                            product.getBrand(),
+                            product.getPrice(),
+                            product.getStock());
+                }
             }
+
+            System.out.println("+------------+--------------------+----------------+------------+------------+");
         }
     }
-
-
 }

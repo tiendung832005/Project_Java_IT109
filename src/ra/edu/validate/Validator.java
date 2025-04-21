@@ -1,5 +1,8 @@
 package ra.edu.validate;
 
+import ra.edu.business.dao.CustomerDAO;
+import ra.edu.business.dao.ProductDAO;
+
 import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +31,54 @@ public class Validator {
         Pattern pattern = Pattern.compile(dateRegex);
         Matcher matcher = pattern.matcher(date);
         return matcher.matches();
+    }
+
+    // Kiểm tra địa chỉ
+    public static boolean isValidAddress(String address){
+        if(address == null || address.trim().isEmpty()){
+            System.out.println("Địa chỉ không được để trống.");
+            return false;
+        }
+        if (address.length() < 5 || address.length() > 255){
+            System.out.println("Địa chỉ phải có độ dài từ 5 đến 255 ký tự");
+            return false;
+        }
+        return true;
+    }
+
+    // Kiểm tra sđt duy nhất
+    public static boolean isUniquePhoneNumber(String phoneNumber, CustomerDAO customerDAO){
+        if(!isValidPhoneNumber(phoneNumber)){
+            return false;
+        }
+        if(customerDAO.isPhoneNumberExists(phoneNumber)){
+            System.out.println("Số điện thoại đã tồn tại.");
+            return false;
+        }
+        return true;
+    }
+
+    //Kiểm tra email duy nhất
+    public static boolean isUniqueEmail(String email, CustomerDAO customerDAO){
+        if(!isValidEmail(email)){
+            return false;
+        }
+        if(customerDAO.isEmailExists(email)){
+            System.out.println("Email đã tồn tại.");
+            return false;
+        }
+        return true;
+    }
+    // Kiểm tra tên sp là duy nhất
+    public static boolean isUniqueProductName(String productName, ProductDAO productDAO){
+        if(!isValidProductName(productName)){
+            return false;
+        }
+        if(productDAO.isProductNameExists(productName)){
+            System.out.println("Tên sản phẩm đã tồn tại.");
+            return false;
+        }
+        return true;
     }
 
     // Kiểm tra tên sản phẩm

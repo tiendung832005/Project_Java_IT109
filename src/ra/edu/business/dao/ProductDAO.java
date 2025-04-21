@@ -7,7 +7,24 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class productDAO {
+public class ProductDAO {
+
+    // Kiểm tra tên sản phẩm duy nhất
+    public boolean isProductNameExists(String productName) {
+        String query = "SELECT COUNT(*) FROM products WHERE name = ?";
+        try (Connection connection = DatabaseConfig.openConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, productName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;  // Nếu trả về số > 0, tức là tên đã tồn tại
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi kiểm tra tên sản phẩm: " + e.getMessage());
+        }
+        return false;
+    }
+
     //Hiển thị ds sản phẩm
     public List<Product> getallProducts(){
         List<Product> products = new ArrayList<>();

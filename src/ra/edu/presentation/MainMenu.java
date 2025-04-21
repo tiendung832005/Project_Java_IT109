@@ -1,10 +1,12 @@
 package ra.edu.presentation;
 
-import ra.edu.business.service.productService;
+import ra.edu.business.service.CustomerService;
+import ra.edu.business.service.ProductService;
 import ra.edu.validate.InputValidator;
 
 public class MainMenu {
-    private static productService productService = new productService();
+    private static ProductService productService = new ProductService();
+    private static final CustomerService customerService = new CustomerService();
 
     private static final String RESET = "\033[0m";
     private static final String GREEN = "\033[32m";
@@ -128,16 +130,17 @@ public class MainMenu {
 
             switch (choice) {
                 case 1:
-                    // Thêm khách hàng
+                    customerService.addNewCustomer();
                     break;
                 case 2:
-                    // Cập nhật khách hàng
+                    customerService.updateCustomer();
                     break;
                 case 3:
                     // Xóa khách hàng
+                    customerService.deleteCustomer();
                     break;
                 case 4:
-                    // Xem danh sách khách hàng
+                    customerService.displayAllCustomers(null);
                     break;
                 case 5:
                     return;
