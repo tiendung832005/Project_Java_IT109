@@ -6,6 +6,7 @@ public class Customer {
     private String phone;
     private String email;
     private String address;
+    private String status;
 
     public int getCustomerId() {
         return customerId;
@@ -47,6 +48,14 @@ public class Customer {
         this.address = address;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Customer{" +
@@ -55,6 +64,7 @@ public class Customer {
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

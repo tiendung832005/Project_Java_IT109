@@ -3,6 +3,7 @@ package ra.edu.business.dao;
 import ra.edu.business.config.DatabaseConfig;
 import ra.edu.entity.Product;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +14,11 @@ public class ProductDAO {
     public boolean isProductNameExists(String productName) {
         String query = "SELECT COUNT(*) FROM products WHERE name = ?";
         try (Connection connection = DatabaseConfig.openConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, productName);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                return resultSet.getInt(1) > 0;  // Nếu trả về số > 0, tức là tên đã tồn tại
+                return resultSet.getInt(1) > 0; // Nếu trả về số > 0, tức là tên đã tồn tại
             }
         } catch (SQLException e) {
             System.out.println("Lỗi khi kiểm tra tên sản phẩm: " + e.getMessage());
@@ -25,16 +26,33 @@ public class ProductDAO {
         return false;
     }
 
-    //Hiển thị ds sản phẩm
-    public List<Product> getallProducts(){
+    // Kiểm tra xử lý tồn kho
+    public boolean isStockSufficient(int productId, int quantity) {
+        String query = "SELECT stock FROM products WHERE product_id = ?";
+        try (Connection connection = DatabaseConfig.openConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1, productId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                int stock = resultSet.getInt("stock");
+                return stock >= quantity;
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi kiểm tra số lượng tồn kho: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // Hiển thị ds sản phẩm
+    public List<Product> getallProducts() {
         List<Product> products = new ArrayList<>();
         String query = "SELECT * FROM products";
 
-        try(Connection connection = DatabaseConfig.openConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query)){
+        try (Connection connection = DatabaseConfig.openConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(query)) {
 
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 Product product = new Product();
                 product.setProductId(resultSet.getInt("product_id"));
                 product.setName(resultSet.getString("name"));
@@ -43,19 +61,35 @@ public class ProductDAO {
                 product.setStock(resultSet.getInt("stock"));
                 products.add(product);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Lỗi khi lấy danh sách sản phẩm: " + e.getMessage());
         }
 
         return products;
     }
 
-    //Thêm điện thoại
-    public void addProduct(Product product){
-        String query =  "INSERT INTO products (name, brand, price, stock) VALUES (?, ?, ?, ?)";
+    //Lấy giá theo id
+    public BigDecimal getProductPriceById(int productId) {
+        String query = "SELECT price FROM products WHERE product_id = ?";
+        try (Connection connection = DatabaseConfig.openConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, productId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getBigDecimal("price");
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi lấy giá sản phẩm: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // Thêm điện thoại
+    public void addProduct(Product product) {
+        String query = "INSERT INTO products (name, brand, price, stock) VALUES (?, ?, ?, ?)";
 
         try (Connection connection = DatabaseConfig.openConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)){
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, product.getName());
             preparedStatement.setString(2, product.getBrand());
@@ -64,7 +98,7 @@ public class ProductDAO {
             preparedStatement.executeUpdate();
 
             System.out.println("Thêm mới sản phẩm thành công");
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Lỗi khi thêm sản phẩm: " + e.getMessage());
         }
     }
@@ -72,11 +106,11 @@ public class ProductDAO {
     // Lấy id điện thoại
     public Product getProductById(int productId) {
         String query = "SELECT * FROM products WHERE product_id = ?";
-        try(Connection connection = DatabaseConfig.openConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)){
+        try (Connection connection = DatabaseConfig.openConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, productId);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 Product product = new Product();
                 product.setProductId(resultSet.getInt("product_id"));
                 product.setName(resultSet.getString("name"));
@@ -85,17 +119,17 @@ public class ProductDAO {
                 product.setStock(resultSet.getInt("stock"));
                 return product;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Lỗi khi lấy sản phẩm: " + e.getMessage());
         }
         return null;
     }
 
     // Cập nhật điện thoại
-    public boolean updateProduct(Product product){
+    public boolean updateProduct(Product product) {
         String query = "UPDATE products SET name = ?, brand = ?, price = ?, stock = ? WHERE product_id = ?";
-        try(Connection connection = DatabaseConfig.openConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)){
+        try (Connection connection = DatabaseConfig.openConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, product.getName());
             preparedStatement.setString(2, product.getBrand());
             preparedStatement.setBigDecimal(3, product.getPrice());
@@ -103,7 +137,7 @@ public class ProductDAO {
             preparedStatement.setInt(5, product.getProductId());
             int rowsUpdated = preparedStatement.executeUpdate();
             return rowsUpdated > 0;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Lỗi khi cập nhật sản phẩm: " + e.getMessage());
             return false;
         }
@@ -113,7 +147,7 @@ public class ProductDAO {
     public boolean deleteProduct(int productId) {
         String query = "DELETE FROM products WHERE product_id = ?";
         try (Connection connection = DatabaseConfig.openConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, productId);
             int rowsDeleted = preparedStatement.executeUpdate();
             return rowsDeleted > 0;
@@ -123,15 +157,15 @@ public class ProductDAO {
         }
     }
 
-    // Tìm kiếm theo nhãn hàng
-    public List<Product> searchProductsByBrand(String brandKeyword){
+    // Tìm kiếm theo tên
+    public List<Product> searchProductsByName(String nameKeyword) {
         List<Product> products = new ArrayList<>();
-        String query = "SELECT * FROM products WHERE brand LIKE ?";
-        try(Connection connection = DatabaseConfig.openConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)){
-            preparedStatement.setString(1, "%" + brandKeyword + "%");
+        String query = "SELECT * FROM products WHERE name LIKE ?";
+        try (Connection connection = DatabaseConfig.openConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, "%" + nameKeyword + "%"); // Tìm kiếm tương đối
             ResultSet resultSet = preparedStatement.executeQuery();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 Product product = new Product();
                 product.setProductId(resultSet.getInt("product_id"));
                 product.setName(resultSet.getString("name"));
@@ -140,22 +174,23 @@ public class ProductDAO {
                 product.setStock(resultSet.getInt("stock"));
                 products.add(product);
             }
-        }catch (SQLException e){
-            System.out.println("Lỗi khi tìm kiếm sản phẩm theo nhãn hàng: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi tìm kiếm sản phẩm theo tên: " + e.getMessage());
         }
         return products;
     }
 
+
     // Tìm kiếm sản phẩm theo khoảng giá
-    public List<Product> searchProductsByPriceRange(double minPrice, double maxPrice){
+    public List<Product> searchProductsByPriceRange(double minPrice, double maxPrice) {
         List<Product> products = new ArrayList<>();
         String query = "SELECT * FROM products WHERE price BETWEEN ? AND ?";
-        try(Connection connection = DatabaseConfig.openConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(query)){
+        try (Connection connection = DatabaseConfig.openConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setDouble(1, minPrice);
             preparedStatement.setDouble(2, maxPrice);
             ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 Product product = new Product();
                 product.setProductId(resultSet.getInt("product_id"));
                 product.setName(resultSet.getString("name"));
@@ -164,18 +199,18 @@ public class ProductDAO {
                 product.setStock(resultSet.getInt("stock"));
                 products.add(product);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("Lỗi khi tìm kiếm sản phẩm theo khoảng giá: " + e.getMessage());
         }
         return products;
     }
 
-    //Tìm kiếm sản phẩm theo tồn kho
+    // Tìm kiếm sản phẩm theo tồn kho
     public List<Product> searchProductsByStockRange(int minStock, int maxStock) {
         List<Product> products = new ArrayList<>();
         String query = "SELECT * FROM products WHERE stock BETWEEN ? AND ?";
         try (Connection connection = DatabaseConfig.openConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, minStock);
             preparedStatement.setInt(2, maxStock);
             ResultSet resultSet = preparedStatement.executeQuery();

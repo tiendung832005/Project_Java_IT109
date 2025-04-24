@@ -2,11 +2,16 @@ package ra.edu.presentation;
 
 import ra.edu.business.service.CustomerService;
 import ra.edu.business.service.ProductService;
+import ra.edu.business.service.ReportService;
 import ra.edu.validate.InputValidator;
+import ra.edu.business.service.InvoiceService;
+
 
 public class MainMenu {
     private static ProductService productService = new ProductService();
     private static final CustomerService customerService = new CustomerService();
+    private static final InvoiceService invoiceService = new InvoiceService();
+    private static final ReportService reportService = new ReportService();
 
     private static final String RESET = "\033[0m";
     private static final String GREEN = "\033[32m";
@@ -18,22 +23,25 @@ public class MainMenu {
         showMainMenu();
     }
 
+    //Menu chương trình
     static void showMainMenu() {
         while (true) {
             System.out.println(GREEN + "============ MENU CHÍNH ============" + RESET);
             System.out.println(BLUE + "1. Quản lý Sản phẩm" + RESET);
             System.out.println(BLUE + "2. Quản lý Khách hàng" + RESET);
             System.out.println(BLUE + "3. Quản lý Hóa đơn" + RESET);
-            System.out.println(BLUE + "4. Thoát" + RESET);
+            System.out.println(BLUE + "4. Thống kê Doanh thu" + RESET);
+            System.out.println(BLUE + "5. Thoát" + RESET);
             System.out.println(GREEN + "====================================" + RESET);
             System.out.print(YELLOW + "Nhập lựa chọn của bạn: " + RESET);
 
-            int choice = InputValidator.getValidInput(1, 4);
+            int choice = InputValidator.getValidInput(1, 5  );
 
             switch (choice) {
                 case 1:
                     showProductMenu();
                     break;
+
                 case 2:
                     showCustomerMenu();
                     break;
@@ -41,6 +49,9 @@ public class MainMenu {
                     showInvoiceMenu();
                     break;
                 case 4:
+                    showStatisticsMenu();
+                    break;
+                case 5:
                     System.out.println(RED + "Thoát chương trình" + RESET);
                     System.exit(0);
                     break;
@@ -50,6 +61,7 @@ public class MainMenu {
         }
     }
 
+    //menu quản lý sp
     private static void showProductMenu() {
         while (true) {
             System.out.println(GREEN + "=== Quản Lý Sản Phẩm ===" + RESET);
@@ -87,10 +99,11 @@ public class MainMenu {
         }
     }
 
+    //Menu nhỏ tìm kiếm sp
     private static void showSearchMenu() {
         while (true) {
             System.out.println(GREEN + "=== Tìm kiếm Sản phẩm ===" + RESET);
-            System.out.println(BLUE + "1. Tìm kiếm theo tên nhãn hàng" + RESET);
+            System.out.println(BLUE + "1. Tìm kiếm theo tên sản phẩm" + RESET);
             System.out.println(BLUE + "2. Tìm kiếm theo giá" + RESET);
             System.out.println(BLUE + "3. Tìm kiếm theo tồn kho" + RESET);
             System.out.println(BLUE + "4. Quay về Menu sản phẩm" + RESET);
@@ -100,7 +113,7 @@ public class MainMenu {
 
             switch (choice) {
                 case 1:
-                    productService.searchProductsByBrand();
+                    productService.searchProductsByName();
                     break;
                 case 2:
                     productService.searchProductsByPriceRange();
@@ -116,6 +129,7 @@ public class MainMenu {
         }
     }
 
+    //Menu quản lý khách hàng
     private static void showCustomerMenu() {
         while (true) {
             System.out.println(GREEN + "=== Quản Lý Khách Hàng ===" + RESET);
@@ -150,6 +164,7 @@ public class MainMenu {
         }
     }
 
+    // Menu quản lý hóa đơn
     private static void showInvoiceMenu() {
         while (true) {
             System.out.println(GREEN + "=== Quản Lý Hóa Đơn ===" + RESET);
@@ -163,13 +178,43 @@ public class MainMenu {
 
             switch (choice) {
                 case 1:
-                    // Thêm hóa đơn
+                    invoiceService.addNewInvoice();
                     break;
                 case 2:
-                    // Xem danh sách hóa đơn
+                    invoiceService.displayAllInvoices();
                     break;
                 case 3:
-                    // Tìm kiếm hóa đơn
+                    invoiceService.searchInvoices();
+                    break;
+                case 4:
+                    return;
+                default:
+                    System.out.println(RED + "Lựa chọn không hợp lệ. Vui lòng thử lại." + RESET);
+            }
+        }
+    }
+
+    // Menu thống kê
+    private static void showStatisticsMenu() {
+        while (true) {
+            System.out.println(GREEN + "=== Thống Kê Doanh Thu ===" + RESET);
+            System.out.println(BLUE + "1. Thống kê theo ngày" + RESET);
+            System.out.println(BLUE + "2. Thống kê theo tháng" + RESET);
+            System.out.println(BLUE + "3. Thống kê theo năm" + RESET);
+            System.out.println(BLUE + "4. Quay về Menu chính" + RESET);
+            System.out.print(YELLOW + "Nhập lựa chọn của bạn: " + RESET);
+
+            int choice = InputValidator.getValidInput(1, 4);
+
+            switch (choice) {
+                case 1:
+                    reportService.displayRevenueBetweenDates();
+                    break;
+                case 2:
+                    reportService.displayRevenueBetweenMonths();
+                    break;
+                case 3:
+                    reportService.displayRevenueBetweenYears();
                     break;
                 case 4:
                     return;

@@ -70,6 +70,7 @@ public class CustomerDAO {
                 customer.setPhone(resultSet.getString("phone"));
                 customer.setEmail(resultSet.getString("email"));
                 customer.setAddress(resultSet.getString("address"));
+                customer.setStatus(resultSet.getString("status"));
                 return customer;
             }
         } catch (SQLException e) {
@@ -96,6 +97,22 @@ public class CustomerDAO {
         }
     }
 
+    // Kiểm tra trc khi xóa xem có hóa đơn k
+    public boolean hasInvoices(int customerId) {
+        String query = "SELECT COUNT(*) FROM invoices WHERE customer_id = ?";
+        try (Connection connection = DatabaseConfig.openConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, customerId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi kiểm tra hóa đơn: " + e.getMessage());
+        }
+        return false;
+    }
+
     // Xóa khách hàng
     public boolean deleteCustomer(int customerId) {
         String query = "DELETE FROM customers WHERE customer_id = ?";
@@ -113,7 +130,7 @@ public class CustomerDAO {
     // Lấy danh sách khách hàng
     public List<Customer> getAllCustomers() {
         List<Customer> customers = new ArrayList<>();
-        String query = "SELECT * FROM customers";
+        String query = "SELECT * FROM customers WHERE status = 'active'";
         try (Connection connection = DatabaseConfig.openConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
